@@ -2,7 +2,6 @@
  Common utility function.
 """
 from math import sqrt
-import itertools
 
 
 def pearson(v1, v2):
@@ -18,10 +17,6 @@ def pearson(v1, v2):
 	if not den: 
 		return 0
 	return 1.0 - num / den
-
-
-def xflatten(lists):
-	return itertools.chain(*lists)
 
 
 def jaccard(sl, sr):

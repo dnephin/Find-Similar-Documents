@@ -3,6 +3,7 @@ from compare import util
 import itertools
 import logging
 from collections import defaultdict
+import cutil
 
 log = logging
 
@@ -75,10 +76,10 @@ class DocumentPropertySetBuilder(object):
 		return props
 
 			
-def find_similar_many(doc_lists, set_compare_func=util.jaccard, segmenter=None):
+def find_similar_many(doc_lists, set_compare_func=cutil.jaccard, segmenter=None):
 	# TODO:
 	segmented_list = [segmenter.segment(dl) for dl in doc_lists]
-	segment_keys = set((seg_doc.keys() for seg_doc in util.xflatten(segmented_list)))
+	segment_keys = set((seg_doc.keys() for seg_doc in itertools.chain(*segmented_list)))
 	for key in segment_keys:
 		for doc_list_combo in itertools.combinations(segmented_list, 2):
 			pass
@@ -86,7 +87,7 @@ def find_similar_many(doc_lists, set_compare_func=util.jaccard, segmenter=None):
 
 def find_similar(
 	doc_iterable, 
-	set_compare_func=util.jaccard, 
+	set_compare_func=cutil.jaccard, 
 	segmenter=None, 
 	set_builder=None, 
 	doc_key='id',
