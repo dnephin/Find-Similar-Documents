@@ -1,2 +1,11 @@
 *.pyc
 *.swp
+
+.idea
+cython/build/
+cython/cutil.c
+cython/cutil.html
+cython/cutil.so
+profile/
+src/cutil.so
+src/test/data

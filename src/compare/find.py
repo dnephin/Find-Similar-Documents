@@ -37,8 +37,10 @@ class SimilarPair(object):
 		self.score = score
 
 	def __repr__(self):
-		# TODO: print with source
-		return "SimilarPair(%s, %s, score=%s)" % (self.doc1, self.doc2, self.score)
+		ss1 = "source(%s):" % self.doc1_source if self.doc1_source is not None else ""
+		ss2 = "source(%s):" % self.doc2_source if self.doc2_source is not None else ""
+		return "SimilarPair(%s%s, %s%s, score=%s)" % (
+			ss1, self.doc1, ss2, self.doc2, self.score)
 
 	@classmethod
 	def for_docs(cls, source1, source2):
@@ -75,19 +77,9 @@ class DocumentPropertySetBuilder(object):
 			props.update(prop_set)
 		return props
 
-			
-def find_similar_many(doc_lists, set_compare_func=cutil.jaccard, segmenter=None):
-	# TODO:
-	segmented_list = [segmenter.segment(dl) for dl in doc_lists]
-	segment_keys = set((seg_doc.keys() for seg_doc in itertools.chain(*segmented_list)))
-	for key in segment_keys:
-		for doc_list_combo in itertools.combinations(segmented_list, 2):
-			pass
-
-
 def find_similar(
 	doc_iterable, 
-	set_compare_func=cutil.jaccard, 
+	compare_func=cutil.jaccard,
 	segmenter=None, 
 	set_builder=None, 
 	doc_key='id',
@@ -98,7 +90,7 @@ def find_similar(
 
 	doc_iterable: 
 		an interable that contains dictionaries
-	set_compare_func: 
+	compare_func:
 		a function which takes two seconds and returns a score of their 
 		similarity (1 is highest, 0 is lowest)
 	segmenter:
@@ -122,10 +114,55 @@ def find_similar(
 			doc_props = set_builder(document)
 
 			for doc_id, other_prop_set in doc_as_props.iteritems():
-				score = set_compare_func(doc_props, other_prop_set)
+				score = compare_func(doc_props, other_prop_set)
 				if score > duplicate_threshold:
 					pairs.append(SimilarPair(doc_id, document[doc_key], score))
 
 			doc_as_props[document[doc_key]] = doc_props
 	return pairs
 
+
+
+def find_similar_many(
+	list_doc_iterable,
+	compare_func=cutil.jaccard,
+	segmenter=None,
+	set_builder=None,
+	doc_key='id',
+	duplicate_threshold=0.8
+):
+	list_segmented_lists = [segmenter(dl) for dl in list_doc_iterable]
+
+	segment_keys = set(
+		itertools.chain(
+			*(segment_map.keys() for segment_map in list_segmented_lists)
+		)
+	)
+
+	pairs = []
+	for segment_key in segment_keys:
+		log.info("Starting segment %s" % segment_key)
+
+		# get documents as prop_sets
+		list_propset_lists = []
+		for document_list in (segments[segment_key] for segments in list_segmented_lists):
+			propset_list = [set_builder(doc) for doc in document_list]
+			list_propset_lists.append(propset_list)
+
+		for left_list_id, right_list_id in itertools.combinations(xrange(len(list_propset_lists)), 2):
+			# Create a class factory for SimilarPairs of these documents
+			pair_factory = SimilarPair.for_docs(left_list_id, right_list_id)
+			left_propset_list = list_propset_lists[left_list_id]
+			right_propset_list =  list_propset_lists[right_list_id]
+
+			# n^2 sucks, but what are you going to do ?
+			for left_idx, left_propset in enumerate(left_propset_list):
+				for right_idx, right_propset in enumerate(right_propset_list):
+					score = compare_func(left_propset, right_propset)
+					if score > duplicate_threshold:
+						pairs.append(pair_factory(
+							list_segmented_lists[left_list_id][segment_key][left_idx][doc_key],
+							list_segmented_lists[right_list_id][segment_key][right_idx][doc_key],
+							score
+						))
+	return pairs
