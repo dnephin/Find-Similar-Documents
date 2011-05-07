@@ -75,28 +75,41 @@ class DocumentPropertySetBuilder(object):
 		return props
 
 			
-def find_similar(doc_lists, set_compare_func=util.jaccard, segmenter=None):
-	"""
-	Find documents in a set of documents (or many sets) that are similar.
-	"""
+def find_similar_many(doc_lists, set_compare_func=util.jaccard, segmenter=None):
+	# TODO:
 	segmented_list = [segmenter.segment(dl) for dl in doc_lists]
-
 	segment_keys = set((seg_doc.keys() for seg_doc in util.xflatten(segmented_list)))
-
 	for key in segment_keys:
 		for doc_list_combo in itertools.combinations(segmented_list, 2):
 			pass
 
 
-def find_similar_single(
-	doc_list, 
+def find_similar(
+	doc_iterable, 
 	set_compare_func=util.jaccard, 
 	segmenter=None, 
 	set_builder=None, 
 	doc_key='id',
 	duplicate_threshold=0.8
 ):
-	segmented_docs = segmenter.segment(doc_list)
+	"""
+	Find similar documents in a list.
+
+	doc_iterable: 
+		an interable that contains dictionaries
+	set_compare_func: 
+		a function which takes two seconds and returns a score of their 
+		similarity (1 is highest, 0 is lowest)
+	segmenter:
+		a function which takes an iterable and returns segments
+	set_builder:
+		a function which builds property sets for the documents
+	doc_key:
+		key in the document dictionary that uniquely identifies the document
+	duplicate_threshold:
+		minimim score required for a pair to be considered a duplicate
+	"""
+	segmented_docs = segmenter(doc_iterable)
 
 	pairs = []
 	for key, segment in segmented_docs.iteritems():
@@ -105,7 +118,7 @@ def find_similar_single(
 		# Convert documents to properties and compare
 		doc_as_props = {}
 		for document in segment:
-			doc_props = set_builder.build_props(document)
+			doc_props = set_builder(document)
 
 			for doc_id, other_prop_set in doc_as_props.iteritems():
 				score = set_compare_func(doc_props, other_prop_set)

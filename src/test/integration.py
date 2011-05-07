@@ -4,7 +4,6 @@ Integration tests.
 import csv
 
 from compare import find
-from compare import util
 from pprint import pprint
 
 
@@ -32,13 +31,24 @@ def c_print(pairs, raw, key='id'):
 raw = read_file('./test/data/simple.txt')
 seg = find.DefaultSegmenter('seg')
 builder = find.DocumentPropertySetBuilder({'first': 'name', 'last': 'name', 'pow': 'pow'})
-pairs = find.find_similar_single(raw, segmenter=seg, set_builder=builder, doc_key='num', duplicate_threshold=0.5)
+pairs = find.find_similar(
+	raw, 
+	segmenter=seg.segment, 
+	set_builder=builder.build_props, 
+	doc_key='num', 
+	duplicate_threshold=0.5
+)
 assert len(pairs), 4
 #c_print(pairs, raw, 'num')
 
 raw = read_file('./test/data/med.txt')
 seg = find.DefaultSegmenter('prov')
 builder = find.DocumentPropertySetBuilder({'name': 'name', 'city': 'city', 'phone': 'phone', 'street': 'street'})
-pairs = find.find_similar_single(raw, segmenter=seg, set_builder=builder, duplicate_threshold=0.3)
+pairs = find.find_similar(
+	raw, 
+	segmenter=seg.segment, 
+	set_builder=builder.build_props, 
+	duplicate_threshold=0.5
+)
 print len(pairs)
 c_print(pairs, raw)
