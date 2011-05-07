@@ -1,7 +1,10 @@
 seg, first, last, num, pow
-M, Daniel Steven, Nephin, 9, 2
-M, Daniel Erica, Nephin, 7, 2
-M, Daniel, Nephin, 4, 2
-M, Daniel, Nephin, 2, 3
-F, Hilary, Duff, 99, 2
-F, Erica, Lenton Mars, 0, 7.0
+M, Daniel Steven, Nephin, 1, 2
+M, Daniel Erica, Nephin, 2, 2
+M, Daniel, Nephin, 3, 2
+M, Daniel, Nephin, 4, 3
+F, Hilary, Duff, 5, 2
+F, Erica, Lenton Mars, 6, 7.0
+F, , Only last name, 7, 9.2
+F, Only first name, , 8, 9.2
+, Blong, asdf, 9, 2.3

@@ -21,7 +21,7 @@ class DefaultSegmenter(object):
 			if self.key not in document:
 				log.warn("%s missing from doc: %s" % (self.key, document))
 				continue
-			segment_map[self.key].append(document)
+			segment_map[document[self.key]].append(document)
 		return segment_map
 
 
@@ -70,7 +70,8 @@ class DocumentPropertySetBuilder(object):
 			if not key in doc:
 				continue
 			# TODO: could this be split some other way?
-			props.update(('%s::%s' % (key, v) for v in doc[key].split()))
+			prop_set = ('%s::%s' % (self.field_map[key], v) for v in doc[key].split())
+			props.update(prop_set)
 		return props
 
 			
