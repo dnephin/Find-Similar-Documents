@@ -7,35 +7,49 @@ from collections import defaultdict
 log = logging
 
 class DefaultSegmenter(object):
+	"""Segment a list of dicts using key as the segmentation point."""
 
 	def __init__(self, key):
 		self.key = key
 
 	def segment(self, document_list):
+		"""Return a dict of segmentation key to a list of documents from
+		document_list that belong in that segment.
+		"""
 		segment_map = defaultdict(list)
 		for document in document_list:
-			if key not in document:
-				log.warn("%s missing from doc: %s" % (key, document))
+			if self.key not in document:
+				log.warn("%s missing from doc: %s" % (self.key, document))
 				continue
-			segment_map[key].append(document)
+			segment_map[self.key].append(document)
 		return segment_map
 
-class SimilarPair(tuple):
+
+class SimilarPair(object):
+	"""A single structure which holds ids of documents which are similar."""
 
 	def __init__(self, doc1, doc2, score, doc1_source=None, doc2_source=None):
 		self.doc1 = doc1
 		self.doc2 = doc2
 		self.doc1_source = doc1_source
 		self.doc2_source = doc2_source
+		self.score = score
+
+	def __repr__(self):
+		# TODO: print with source
+		return "SimilarPair(%s, %s, score=%s)" % (self.doc1, self.doc2, self.score)
 
 	@classmethod
 	def for_docs(cls, source1, source2):
+		"""Return a generator method to create SimilarPair objects whos
+		source are already defined."""
 		def gen_pair(doc1, doc2, score):
 			return SimilarPair(doc1, doc2, score, source1, source2)
 		return gen_pair
 
 
 class DocumentPropertySetBuilder(object):
+	"""Build a set of properties from a dictionary."""
 	
 	def __init__(self, field_map):
 		"""
@@ -50,8 +64,9 @@ class DocumentPropertySetBuilder(object):
 		self.field_map = field_map
 
 	def build_props(self, doc):
+		"""Return a set of properties mapped from a dict."""
 		props = set()
-		for key, value in self.field_map:
+		for key, value in self.field_map.iteritems():
 			if not key in doc:
 				continue
 			# TODO: could this be split some other way?
@@ -92,8 +107,10 @@ def find_similar_single(
 			doc_props = set_builder.build_props(document)
 
 			for doc_id, other_prop_set in doc_as_props.iteritems():
-				if set_compare_func(doc_props, other_prop_set) > duplicate_threshold:
-					pairs.append(SimilarPair(doc_id, document[doc_key]))
+				score = set_compare_func(doc_props, other_prop_set)
+				if score > duplicate_threshold:
+					pairs.append(SimilarPair(doc_id, document[doc_key], score))
 
-			doc_as_props[document['doc_key']] = doc_props
+			doc_as_props[document[doc_key]] = doc_props
 	return pairs
+

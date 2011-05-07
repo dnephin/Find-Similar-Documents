@@ -2,6 +2,7 @@
  Common utility function.
 """
 from math import sqrt
+import itertools
 
 
 def pearson(v1, v2):
@@ -28,4 +29,6 @@ def jaccard(sl, sr):
 	union = sl | sr
 	if not union:
 		return 0.0
-	return len(sl & sr) / float(union)
+	return len(sl & sr) / float(len(union))
+
+

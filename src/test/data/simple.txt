@@ -1,0 +1,7 @@
+seg, first, last, num, pow
+M, Daniel Steven, Nephin, 9, 2
+M, Daniel Erica, Nephin, 7, 2
+M, Daniel, Nephin, 4, 2
+M, Daniel, Nephin, 2, 3
+F, Hilary, Duff, 99, 2
+F, Erica, Lenton Mars, 0, 7.0
