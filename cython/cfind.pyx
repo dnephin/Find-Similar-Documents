@@ -4,17 +4,17 @@ import cutil
 
 log = logging
 
-def find_similar(
+cpdef find_similar(
 	doc_iterable,
 	compare_func=cutil.jaccard,
 	segmenter=None,
 	set_builder=None,
-	doc_key='id',
-	duplicate_threshold=0.8
+	char *doc_key='id',
+	double duplicate_threshold=0.8
 ):
+	cdef double score
 	segmented_docs = segmenter(doc_iterable)
 
-	pairs = []
 	pairs = []
 	for key, segment in segmented_docs.iteritems():
 		log.info("Starting segment %s" % key)
