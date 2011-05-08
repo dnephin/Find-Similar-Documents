@@ -1,5 +1,14 @@
+"""
+ Find similar (or possibly duplicate) documents in a list of one or more
+ documents.  This is accomplished by turning each document into a set
+ of properties (propsets).  Document propsets are then compared (using
+ jaccard index by default) to find the similarity between then.  If
+ that value is greater then a threshold, then those documents are considered
+ to be similar, and are returned as a pair.
 
-from compare import util
+ Author: Daniel Nephin
+ 
+"""
 import itertools
 import logging
 from collections import defaultdict
@@ -89,18 +98,18 @@ def find_similar(
 	Find similar documents in a list.
 
 	doc_iterable: 
-		an interable that contains dictionaries
+		an iterable that contains dictionaries
 	compare_func:
-		a function which takes two seconds and returns a score of their 
+		a function which takes two sets and returns a score of their
 		similarity (1 is highest, 0 is lowest)
 	segmenter:
 		a function which takes an iterable and returns segments
 	set_builder:
-		a function which builds property sets for the documents
+		a function which builds and returns a property set for a document
 	doc_key:
 		key in the document dictionary that uniquely identifies the document
 	duplicate_threshold:
-		minimim score required for a pair to be considered a duplicate
+		minimum score required for a pair to be considered a duplicate
 	"""
 	segmented_docs = segmenter(doc_iterable)
 
@@ -131,6 +140,23 @@ def find_similar_many(
 	doc_key='id',
 	duplicate_threshold=0.8
 ):
+	"""
+	Find similar documents between the list of document lists.
+
+	list_doc_iterable:
+		an iterable that contains sequences of dictionaries
+	compare_func:
+		a function which takes two sets and returns a score of their
+		similarity (1 is highest, 0 is lowest)
+	segmenter:
+		a function which takes an iterable and returns segments
+	set_builder:
+		a function which builds and returns a property set for a document
+	doc_key:
+		key in the document dictionary that uniquely identifies the document
+	duplicate_threshold:
+		minimum score required for a pair to be considered a duplicate
+	"""
 	list_segmented_lists = [segmenter(dl) for dl in list_doc_iterable]
 
 	segment_keys = set(

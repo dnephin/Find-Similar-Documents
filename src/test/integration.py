@@ -4,8 +4,6 @@ Integration tests.
 import csv
 
 from compare import find
-from pprint import pprint
-
 
 def read_file(file):
 	reader = csv.reader(open(file, 'r'),)
@@ -19,10 +17,8 @@ def read_file(file):
 def map_by_key(seq, key):
 	return dict(((item[key], item) for item in seq))
 
-def c_print(pairs, raw1, raw2, key='id'):
-	m = []
-	m.append(map_by_key(raw1, key))
-	m.append(map_by_key(raw2, key))
+def c_print(pairs, raw, key='id'):
+	m = [map_by_key(r, key) for r in raw]
 	for pair in sorted(pairs, key=lambda p: p.score, reverse=True):
 		print "%s\n%s\n%s\n\n" % (
 			pair,
@@ -44,11 +40,11 @@ builder = find.DocumentPropertySetBuilder({'name': 'name', 'city': 'city', 'phon
 #print len(pairs)
 #c_print(pairs, raw)
 
-raw1 = read_file('./test/data/small1.txt')
-raw2 = read_file('./test/data/small2.txt')
+
+raw = [read_file('./test/data/small%s.txt' % i) for i in xrange(1,5)]
 seg = find.DefaultSegmenter('prov')
 builder = find.DocumentPropertySetBuilder({'name': 'name', 'city': 'city', 'phone': 'phone', 'street': 'street'})
-pairs = find.find_similar_many([raw1, raw2], segmenter=seg.segment, set_builder=builder.build_props, duplicate_threshold=0.5)
+pairs = find.find_similar_many(raw, segmenter=seg.segment, set_builder=builder.build_props, duplicate_threshold=0.5)
 print len(pairs)
-c_print(pairs, raw1, raw2)
+c_print(pairs, raw)
 
