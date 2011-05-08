@@ -3,9 +3,8 @@
 
 .idea
 cython/build/
-cython/cutil.c
-cython/cutil.html
-cython/cutil.so
+cython/*.c
+cython/*.so
 profile/
-src/cutil.so
+src/*.so
 src/test/data

@@ -115,7 +115,7 @@ def find_similar(
 
 	pairs = []
 	for key, segment in segmented_docs.iteritems():
-		log.info("Starting segment %s" % (key))
+		log.info("Starting segment %s" % key)
 		
 		# Convert documents to properties and compare
 		doc_as_props = {}
