@@ -35,7 +35,7 @@ builder = find.DocumentPropertySetBuilder({'first': 'name', 'last': 'name', 'pow
 #c_print(pairs, raw, 'num')
 
 raw = read_file('./test/data/med.txt')
-seg = find.DefaultSegmenter('prov')
+seg = find.MultiSegmenter(['phone', 'city'])
 builder = find.DocumentPropertySetBuilder({'name': 'name', 'city': 'city', 'phone': 'phone', 'street': 'street'})
 pairs = cfind.find_similar(raw, segmenter=seg.segment, set_builder=builder.build_props, duplicate_threshold=0.5)
 print len(pairs)

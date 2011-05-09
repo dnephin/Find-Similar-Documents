@@ -48,12 +48,15 @@ class MultiSegmenter(DefaultSegmenter):
 		self.keys = keys
 
 	def segment(self, document_list):
+		segment_map = {}
 		for key in self.keys:
-			for segment in super(MultiSegmenter, self).segment(
+			key_segment_map = super(MultiSegmenter, self).segment(
 				document_list,
 				key=key
-			):
-				yield segment
+			)
+			segment_map.update(key_segment_map)
+		return segment_map
+
 
 
 class SimilarPair(object):
