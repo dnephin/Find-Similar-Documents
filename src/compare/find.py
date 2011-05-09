@@ -22,17 +22,38 @@ class DefaultSegmenter(object):
 	def __init__(self, key):
 		self.key = key
 
-	def segment(self, document_list):
+	def segment(self, document_list, key=None):
 		"""Return a dict of segmentation key to a list of documents from
 		document_list that belong in that segment.
 		"""
+		key = key or self.key
+
 		segment_map = defaultdict(list)
 		for document in document_list:
-			if self.key not in document:
-				log.warn("%s missing from doc: %s" % (self.key, document))
+			if key not in document:
+				log.warn("%s missing from doc: %s" % (key, document))
 				continue
-			segment_map[document[self.key]].append(document)
-		return segment_map
+			segment_map[document[key]].append(document)
+
+		def only_two_or_more(t_value_list):
+			return len(t_value_list[1]) > 1
+		return itertools.ifilter(only_two_or_more, segment_map.iteritems())
+
+class MultiSegmenter(DefaultSegmenter):
+	"""Segment a list of dicts on many keys. Documents can be returned more
+	then once if they more then once key is used.
+	"""
+
+	def __init__(self, keys):
+		self.keys = keys
+
+	def segment(self, document_list):
+		for key in self.keys:
+			for segment in super(MultiSegmenter, self).segment(
+				document_list,
+				key=key
+			):
+				yield segment
 
 
 class SimilarPair(object):
