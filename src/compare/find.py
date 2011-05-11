@@ -15,6 +15,7 @@ from collections import defaultdict
 import cutil
 
 log = logging
+logging.basicConfig(level=logging.WARN)
 
 class DefaultSegmenter(object):
 	"""Segment a list of dicts using key as the segmentation point."""
@@ -82,6 +83,20 @@ class SimilarPair(object):
 		def gen_pair(doc1, doc2, score):
 			return SimilarPair(doc1, doc2, score, source1, source2)
 		return gen_pair
+
+	def __eq__(self, other):
+		return 	(
+				self.doc1 == other.doc1 and self.doc2 == other.doc2 and
+				self.doc1_source == other.doc1_source and self.doc2_source == other.doc2_source
+			) or (
+				self.doc2 == other.doc1 and self.doc1 == other.doc2 and
+				self.doc2_source == other.doc1_source and self.doc1_source == other.doc2_source
+			)
+
+#	def __hash__(self):
+
+
+		
 
 
 class DocumentPropertySetBuilder(object):
@@ -155,6 +170,44 @@ def find_similar(
 	return pairs
 
 
+def find_probably(doc_iterable, set_builder=None, max_prop_freq=100, threshold=0.8):
+
+	prop_map = defaultdict(list)
+	exclude_props = set()
+
+	for doc in doc_iterable:
+		propset = set_builder(doc)
+		# Add all properties to 
+		for prop in propset:
+			if prop in exclude_props:
+				continue
+			prop_map[prop].append((doc, propset))
+			# remove any above size threshold
+			if len(prop_map[prop]) > max_prop_freq:
+				log.info("Dropping prop %s" % prop)
+				del prop_map[prop]
+				exclude_props.add(prop)
+
+	def only_two_or_more(t_value_list):
+		return len(t_value_list[1]) > 1
+
+	pairs = set()
+
+	for prop, document_pair_list in itertools.ifilter(only_two_or_more, prop_map.iteritems()):
+		log.info("Starting compare for property %s" % prop)
+		scan_list = []
+		for doc, propset in document_pair_list:
+			for other_doc, other_propset in scan_list:
+				score = cutil.jaccard(propset, other_propset)
+				if score > threshold:
+					pair = SimilarPair(doc, other_doc, score)
+					if pair not in pairs:
+						pairs.add(pair)
+			scan_list.append((doc, propset))
+					
+	return pairs
+
+
 
 def find_similar_many(
 	list_doc_iterable,
@@ -216,3 +269,25 @@ def find_similar_many(
 							score
 						))
 	return pairs
+
+
+def reduce(pairs, key='id'):
+	"""Reduce pairs to a unique list of documents that match."""
+
+#	key_func = lambda k: k if key is None else lambda d: d[key]
+	pivot_map = defaultdict(set)
+
+	for pair in pairs:
+		key1 = pair.doc1[key]
+		key2 = pair.doc2[key]
+
+		if key1 in pivot_map:
+			pivot_map[key1].add(key2)
+			continue
+		if key2 in pivot_map:
+			pivot_map[key2].add(key1)
+			continue
+
+		pivot_map[key1].add(key2)
+
+	return pivot_map

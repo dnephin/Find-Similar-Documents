@@ -36,7 +36,7 @@ writer.writerow((
 	'street',
 	'phone'
 ))
-for i in xrange(2000):
+for i in xrange(1000000):
 	writer.writerow((
 		i,
 		get_name(),
